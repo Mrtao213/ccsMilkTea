@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>分类列表</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+</head>
+<body>
+<div id="list">
+    <el-row style="margin-top: 40px">
+        <el-input
+                type="text"
+                v-model="input"
+                placeholder="请输入分类名称"
+                style="width: 250px">
+        </el-input>
+        <el-button type="primary" @click="init">搜索</el-button>
+        <el-button
+                type="primary"
+                @click="addCategory"
+                style="margin-left: 980px">
+            新建分类
+        </el-button>
+    </el-row>
+
+    <el-table
+            :data="tableData"
+            style="width: 100%; margin-top: 20px">
+        <el-table-column
+                prop="id"
+                label="分类ID"
+                width="300">
+        </el-table-column>
+        <el-table-column
+                prop="categoryName"
+                label="分类名称"
+                align="center">
+        </el-table-column>
+        <el-table-column
+                label="操作"
+                width="300"
+                fixed="right">
+            <template slot-scope="scope">
+                <el-button
+                        type="text"
+                        @click="updateHandle(scope.row.id)"
+                >
+                    修改
+                </el-button>
+                <el-button
+                        type="danger"
+                        @click="deleteHandle(scope.row.id)"
+                >
+                    删除
+                </el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <div class="block" style="margin-left: 600px">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="page"
+                :page-sizes="[10,20,30,40]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="counts">
+        </el-pagination>
+    </div>
+</div>
+
+<script src="../../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../../plugins/axios/axios.min.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../js/index.js"></script>
+<script src="../../api/category.js"></script>
+
+
+<script>
+    new Vue({
+        el: '#list',
+        data() {
+            return{
+                input: '',
+                page: 1,
+                pageSize: 10,
+                counts: 40,
+                tableData: [],
+                checkList: []
+            }
+        },
+        created(){
+            this.init()
+        },
+        methods: {
+            getImageUrl(url){
+                let imgUrl = "/static/"+url
+                return imgUrl;
+            },
+            handleSizeChange(val) {
+                this.pageSize = val
+                this.init()
+            },
+            handleCurrentChange(val) {
+                this.page = val
+                this.init()
+            },
+            addCategory() {
+                window.location.href = "add.html"
+            },
+            async init(){
+                const params ={
+                    page: this.page,
+                    pageSize: this.pageSize,
+                    name: this.input ? this.input : undefined
+                }
+                queryCategory(params).then(res=>{
+                    if(String(res.code) === '1'){
+                        this.tableData = res.data.records
+                        this.counts = res.data.total
+                    }
+                }).catch(err=>{
+                    this.$message.error("请求出错了" + err)
+                })
+            },
+            deleteHandle(id){
+                let ids = {
+                    id: id
+                }
+                this.$confirm('确认删除该分类，是否继续？', '确认删除', {
+                    confirmButtonText: '确认',
+                    cancelButtonText: '取消'
+                }).then(() => {
+                    deleteCategory(ids).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('删除成功')
+                            this.init()
+                        }
+                    })
+                })
+            },
+            updateHandle(id){
+                window.parent.menuHandle({
+                    id: '1',
+                    url: '/backend/page/category/add.html?id='+id,
+                    name: '修改分类'
+                },true)
+            },
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新增员工</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+</head>
+<body>
+<div id="add">
+    <div>
+        <el-form
+                ref="ruleForm"
+                labelwidth="60px"
+                :inline="true"
+                style="margin-top: 60px"
+        >
+            <div>
+                <el-form-item label="分类ID" prop="id" >
+                    <el-input type="number"
+                              v-model="ruleForm.id"
+                              style="width: 200px;"
+                              placeholder="请输入分类ID"
+                              maxlength="20">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="分类名称" prop="text" >
+                    <el-input type="text"
+                              v-model="ruleForm.categoryName"
+                              style="width: 200px;"
+                              placeholder="请输入茶品名称"
+                              maxlength="20">
+                    </el-input>
+                </el-form-item>
+            </div>
+
+            <div>
+                <el-form-item style="margin-left: 60px">
+                    <el-button
+                            type="primary"
+                            @click="submitForm">创建
+                    </el-button>
+                    <el-button
+                            style="margin-left: 20px"
+                            @click="cancle">
+                        取消
+                    </el-button>
+                </el-form-item>
+            </div>
+
+        </el-form>
+
+    </div>
+</div>
+
+<script src="../../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../../plugins/axios/axios.min.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../js/index.js"></script>
+<script src="../../api/tea.js"></script>
+<script src="../../api/Category.js"></script>
+
+<script>
+    new Vue({
+        el: '#add',
+        data(){
+            return{
+                id: '',
+                visible: true,
+                imageUrl: '',
+                ruleForm: {
+                    userName: '',
+                    password: '',
+                    phone: '',
+                    address: ''
+                },
+                actionType: '',
+            }
+        },
+        created() {
+            this.id = requestUrlParam('id')
+            this.actionType = this.id ? 'edit' : 'add'
+            if (this.id) {
+                this.init()
+            }
+        },
+        methods:{
+            async init () {
+                let ids ={
+                    id: this.id
+                }
+                queryCategoryById(ids).then(res => {
+                    if (String(res.code) === '1') {
+                        this.ruleForm = { ...res.data }
+                    } else {
+                        this.$message.error(res.msg || '操作失败')
+                    }
+                })
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList)
+            },
+            handlePictureCardPreview(file) {
+
+            },
+            handleAvatarSuccess(response,file,fileList){
+                this.ruleForm.image = response
+            },
+            cancle(){
+                window.location.href = 'list.html'
+            },
+            submitForm(){
+                let params = this.ruleForm
+                if (this.actionType == 'add') {
+                    addCategory(params).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('添加成功')
+                            this.goBack()
+                        }
+                        else{
+                            this.$message.error(res.msg)
+                        }
+                    })
+                }
+                else {
+                    updateCategory(params).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('修改成功！')
+                            window.location.href = 'list.html'
+                        } else {
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    })
+                }
+            },
+            goBack(){
+                window.parent.menuHandle({
+                    id: '1',
+                    url: '/backend/page/category/list.html',
+                    name: '分类管理'
+                },false)
+            }
+        }
+    })
+</script>
+</body>
+</html>

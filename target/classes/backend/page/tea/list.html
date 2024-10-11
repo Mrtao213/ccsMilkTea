@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>茶品列表</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+</head>
+<body>
+    <div id="list">
+        <el-row style="margin-top: 40px">
+        <el-input
+                type="text"
+                v-model="input"
+                placeholder="请输入茶品名称"
+                style="width: 250px">
+        </el-input>
+        <el-button type="primary" @click="init">搜索</el-button>
+        <el-button
+                type="warning"
+                style="margin-left:100px"
+                @click="deleteTeas(checkList)">
+            批量删除
+        </el-button>
+        <el-button
+                type="primary"
+                @click="addTea"
+                style="margin-left: 900px">
+            新建茶品
+        </el-button>
+        </el-row>
+
+        <el-table
+                :data="tableData"
+                style="width: 100%; margin-top: 20px"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    prop="teaName"
+                    label="名称"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="price"
+                    label="单价"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="description"
+                    label="描述">
+            </el-table-column>
+            <el-table-column
+                    prop="image"
+                    label="图片"
+                    align="center">
+                <template slot-scope="{row}">
+                    <el-image
+                        style="width: 40px;height: auto"
+                        :src="getImageUrl(row.image)">
+                    </el-image>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="180">
+                <template slot-scope="scope">
+                <el-button
+                    type="text"
+                    @click="updateHandle(scope.row.id)"
+                >
+                    修改
+                </el-button>
+                <el-button
+                    type="danger"
+                    @click="deleteHandle(scope.row.id)"
+                >
+                    删除
+                </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <div class="block" style="margin-left: 600px">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="page"
+                    :page-sizes="[10,20,30,40]"
+                    :page-size="pageSize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="counts">
+            </el-pagination>
+        </div>
+    </div>
+
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../api/tea.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../js/index.js"></script>
+
+    <script>
+        new Vue({
+            el: '#list',
+            data() {
+                return{
+                    input: '',
+                    page: 1,
+                    pageSize: 10,
+                    counts: 40,
+                    tableData: [],
+                    checkList: []
+                }
+            },
+            created(){
+                this.init()
+            },
+            methods: {
+                getImageUrl(url){
+                    let imgUrl = "/static/"+url
+                    return imgUrl;
+                },
+                handleSelectionChange(val) {
+                    let checkArray = []
+                    val.forEach((n)=>{
+                        checkArray.push(n.id)
+                    })
+                    this.checkList = checkArray
+                },
+                toggleSelection(rows) {
+                    if (rows) {
+                        rows.forEach(row => {
+                            this.$refs.multipleTable.toggleRowSelection(row);
+                        });
+                    } else {
+                        this.$refs.multipleTable.clearSelection();
+                    }
+                },
+                handleSizeChange(val) {
+                    this.pageSize = val
+                    this.init()
+                },
+                handleCurrentChange(val) {
+                    this.page = val
+                    this.init()
+                },
+                addTea() {
+                    window.location.href = "add.html"
+                },
+                returnIndex() {
+                    window.location.href = "/backend/index.html"
+                },
+                async init(){
+                    const params ={
+                        page: this.page,
+                        pageSize: this.pageSize,
+                        name: this.input ? this.input : undefined
+                    }
+                    await getTeaPage(params).then(res=>{
+                        if(String(res.code) === '1'){
+                            this.tableData = res.data.records || []
+                            this.counts = res.data.total
+                        }
+                    }).catch(err=>{
+                        this.$message.error("请求出错了" + err)
+                    })
+                },
+                deleteHandle(id){
+                    let ids = {
+                        id: id
+                    }
+                this.$confirm('确认删除该茶品，是否继续？', '确认删除', {
+                    confirmButtonText: '确认',
+                    cancelButtonText: '取消'
+                }).then(() => {
+                    deleteTea(ids).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('删除茶品成功')
+                            this.init()
+                        }
+                    })
+                })
+                },
+                deleteTeas(checkList){
+                    if(checkList.length === 0){
+                        this.$message.error('请选择要删除的茶品')
+                    }
+                    else{
+                        this.$confirm('确认删除该订单，是否继续？', '确认删除', {
+                            confirmButtonText: '确认',
+                            cancelButtonText: '取消'
+                        }).then(() => {
+                        batchDeleteTea(checkList).then(res=>{
+                            if(res.code === 1){
+                                this.$message.success('批量删除成功')
+                                this.init()
+                            }
+                        })
+                        })
+                        }
+                    },
+                updateHandle(id){
+                    window.parent.menuHandle({
+                    id: '2',
+                    url: '/backend/page/tea/add.html?id='+id,
+                    name: '修改茶品'
+                    },true)
+                    },
+            }
+        })
+    </script>
+</body>
+</html>

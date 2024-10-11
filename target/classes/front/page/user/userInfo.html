@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+    <link rel="stylesheet" href="/front/styles/front.css" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+</head>
+<body>
+    <div id="app-user" class="div_common">
+        <div class="div_userInfo">
+            <image src="/static/cc.png" style="width: 30px; height: 30px" @click="returnIndex"></image>
+        </div>
+      <el-form :model="user" style="margin-left: -8px;">
+          <h4>用户姓名</h4>
+          <el-form-item>
+              <el-input type="text" v-model="user.userName" readonly="true"></el-input>
+          </el-form-item>
+              <h4>电话</h4>
+              <image src="/static/bb.png" style=" position: absolute; top:243px; left: 40px; width: 30px; height: 30px;"></image>
+          <el-form-item>
+              <el-input type="number" v-model="user.phone"></el-input>
+          </el-form-item>
+          <h4>常用地址</h4>
+          <image src="/static/aa.png" style=" position: absolute; top:346px; left: 70px; width: 30px; height: 30px;"></image>
+          <el-form-item>
+              <el-input type="textarea" v-model="user.address"></el-input>
+          </el-form-item>
+      </el-form>
+        <div style="text-align: center">
+            <el-button type="danger" @click="logout()">退出登录</el-button>
+        </div>
+    </div>
+
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/user.js"></script>
+    <script src="../../api/login.js"></script>
+
+    <script>
+        new Vue({
+            el: '#app-user',
+            data() {
+                return {
+                    user: {}
+                }
+            },
+            created() {
+              let userInfo = JSON.parse(localStorage.getItem('user'))
+              if(userInfo){
+                  let id = {
+                      id: userInfo.id
+                  }
+                  queryUserById(id).then(res=>{
+                      if(res.data.code === 1){
+                          this.user = res.data.data
+                      }
+                  })
+              }
+            },
+            methods: {
+                returnIndex() {
+                    updateUser(this.user).then(res=>{
+                        if(res.data.code === 1){
+                            window.location.href = '../../index.html'
+                        }
+                        this.$message.error(res.data.msg)
+                    })
+
+                },
+                logout(){
+                    logoutApi().then(res=>{
+                        if(res.data.code === 1){
+                            localStorage.removeItem('user')
+                            window.location.href = '../login/login.html'
+                        }
+                    })
+
+                }
+            }
+        })
+    </script>
+</body>
+</html>

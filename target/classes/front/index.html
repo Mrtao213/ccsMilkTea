@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>脆脆鲨奶茶</title>
+    <link rel="stylesheet" href="plugins/element-ui/index.css" />
+    <link rel="stylesheet" href="/front/styles/front.css" />
+    <!--引入vant样式-->
+    <link rel="stylesheet" href="styles/vant.min.css"/>
+    <link rel="shortcut icon" href="logo.ico">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+</head>
+<body>
+    <div id="app" class="div3">
+        <div class="div4">
+            <el-image
+                src="/static/h666666.png"
+                @click="userInfo()"
+                style="width: 40px; height: 40px"></el-image>
+            <div style="margin-left: 0px; width: 100px; height: 80px; font-size: 12px; background-color: white; border-radius: 12px; border: 1px solid grey;text-align: center; z-index: 3000;">
+                <div style="font-size: 15px">脆脆鲨奶茶</div>
+                <div> <image src="/static/location.png" style="width: 8px; height: 15px"/> 距离：3km</div>
+                <div> <image src="/static/money.png" style="width: 8px; height: 15px"/> 配送费：3元</div>
+                <div> <image src="/static/time.png" style="width: 8px; height: 15px"/> 预计：25min</div>
+            </div>
+        </div>
+        <div style="width: 100px; height: 592px; display: inline-block; background-color: #f6f6f6;">
+        <el-menu
+                default-active="1"
+                class="el-menu-vertical-demo"
+                @open="handleOpen"
+                @close="handleClose"
+                style="position: absolute; top: 120px; width: 100px; height: 400px; background-color: #f6f6f6; overflow: scroll">
+            <div v-for="item in menuList" :key="item.id">
+                <el-menu-item :index="item.id" @click="menuHandle(item.id)">
+                    <span slot="title">{{item.title}}</span>
+                </el-menu-item>
+            </div>
+        </el-menu>
+        </div>
+
+        <div style="width: 280px; height: 400px; display: inline-block; position: absolute; top: 125px; overflow: scroll">
+        <div v-for="item in teaList" :key="item.id" style="margin-top: 0px">
+            <el-image
+                :src="getImageUrl(item.image)"
+                style="width: 80px; height: 80px; display: inline-block">
+            </el-image>
+            <div style="display: inline-block">
+                <div style="font-size: 18px;">{{item.teaName}}</div>
+                <div style="font-size: 12px; color: grey">{{item.description}}</div>
+                <div style="font-size: 15px; color: red">¥{{item.price}}</div>
+            </div>
+            <el-image
+                    src="/static/addicon.ico"
+                    style="display: inline-block; width: 25px; height: 25px; position: absolute; right: 10px; margin-top: 60px"
+                    @click="chooseFlavour(item.id)">
+            </el-image>
+        </div>
+        </div>
+
+        <van-popup
+            v-model="dialogVisible"
+            position="bottom"
+            style="height: 50%;  border-radius: 12px 12px 0px 0px; overflow: hidden">
+            <div style="height: 50px; border-bottom: 1px solid lightgrey">
+                <div style="margin-top: 10px; font-size: 25px">购物车</div>
+                <div @click="clear" style="position: absolute; left: 300px; top: 20px; color: grey; font-size: 14px">
+                    <i class="el-icon-delete">清空</i>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 60px; height: 180px; overflow: scroll">
+                <div v-for="item in goods" :key="item.id">
+                    <ul>
+                        <li>
+                            <div style="display: inline-block"><el-image :src="getImageUrl(item.image)" style="width: 50px; height: 60px"></el-image></div>
+                            <div style="display: inline-block">
+                                <div>{{item.teaName}}</div>
+                                <div>¥{{item.price}}</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </van-popup>
+
+        <div class="divCart">
+            <el-image src="/static/l666666.jpg" @click="cartVisible" style="margin-left: 10px; width: 50px; height: 40px;"></el-image>
+            <span style="color: red; position: absolute; left: 70px; top: 10px">¥{{money}}</span>
+            <el-button
+                    round type="warning"
+                    style="position: absolute; left: 225px; top: 3px"
+                    @click="payment()">去结算</el-button>
+        </div>
+
+
+    </div>
+
+
+    <script src="plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="plugins/axios/axios.min.js"></script>
+    <script src="js/request.js"></script>
+    <script src="js/vant.min.js"></script>
+    <script src="api/tea.js"></script>
+    <script src="api/shoppingCart.js"></script>
+    <script src="api/alipay.js"></script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    id: 1,
+                    money: 0,
+                    menuList: [
+                        {
+                            id: '0',
+                            title: '当季新品'
+                        },
+                        {
+                            id: '1',
+                            title: '果茶',
+                        },
+                        {
+                            id: '2',
+                            title: '奶茶',
+                        },
+                        {
+                            id: '3',
+                            title: '咖啡'
+                        },
+                        {
+                            id: '4',
+                            title: '冰激凌'
+                        },
+                        {
+                            id: '5',
+                            title: '芝士奶盖'
+                        },
+                        {
+                            id: '6',
+                            title: '原味纯茶'
+                        },
+                        {
+                            id: '7',
+                            title: '清乳系列'
+                        }
+                    ],
+                    teaList: [],
+                    goods: [],
+                    dialogVisible: false,
+                    formUrl: '',
+                }
+            },
+            created(){
+                this.init(1)
+            },
+            methods: {
+                init(id){
+                    let ids = {
+                        id: id
+                    }
+                    selectByCategory(ids).then(res=>{
+                        if(res.data.code === 1){
+                            this.teaList = res.data.data
+                        }
+                    })
+                    let userInfo = JSON.parse(localStorage.getItem('user'))
+                    let userId = {
+                        userId: userInfo.id
+                    }
+
+                    queryCart(userId).then(res=>{
+                        if(res.data.code === 1){
+                            this.goods = res.data.data
+                            this.money = 0
+                            for(let i= 0; i<this.goods.length; i++){
+                                this.money += this.goods[i].price
+                            }
+                        }
+                        else{
+                            this.$message.error(res.data.msg)
+                        }
+                    })
+
+                },
+                getImageUrl(url) {
+                    return '/static/'+url
+                },
+                menuHandle(id){
+                    this.init(id)
+                },
+                handleOpen(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                handleClose(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                chooseFlavour(id){
+                    let url = "page/flavour/flavour.html?id="+ id
+                    window.location.href = url
+                },
+                userInfo(){
+                    window.location.href = 'page/user/userInfo.html'
+                },
+                cartVisible(){
+                    this.dialogVisible = true
+                },
+                clear(){
+                    let userInfo = JSON.parse(localStorage.getItem('user'))
+                    let userId = {
+                        userId: userInfo.id
+                    }
+                    clearCart(userId).then(res=>{
+                        if(res.data.code === 1){
+                            this.init(1)
+                        }
+                    })
+                },
+                payment(){
+                    let userInfo = JSON.parse(localStorage.getItem('user'))
+                    let userId = {
+                        id: userInfo.id,
+                        money: this.money,
+                        userName: userInfo.userName,
+                        phone: userInfo.phone,
+                        address: userInfo.address
+                    }
+                    alipay(userId).then(res=>{
+                        let alipayUrl = res.data
+                        window.open(alipayUrl)
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

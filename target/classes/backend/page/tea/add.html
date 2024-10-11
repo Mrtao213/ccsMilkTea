@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新增茶品</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+</head>
+<body>
+    <div id="add">
+     <div>
+       <el-form
+        ref="ruleForm"
+        labelwidth="60px"
+        :inline="true"
+        style="margin-top: 60px"
+       >
+          <div>
+          <el-form-item label="茶品名称" prop="tea_name" >
+              <el-input type="text"
+                        v-model="ruleForm.teaName"
+                        style="width: 200px;"
+                        placeholder="请输入茶品名称"
+                        maxlength="20">
+              </el-input>
+          </el-form-item>
+           <el-form-item label="单价" prop="price" style=" margin-left: 100px">
+               <el-input type="number"
+                         v-model="ruleForm.price"
+                         style="width: 200px"
+                         placeholder="请输入茶品单价"
+                         min="0"
+                         max="100">
+               </el-input>
+           </el-form-item>
+           </div>
+
+           <div>
+               <el-form-item label="茶品描述" prop="description" >
+                   <el-input
+                         type="textarea"
+                         v-model="ruleForm.description"
+                         style="width: 400px;"
+                         placeholder="请输入茶品名称"
+                         :rows="3"  >
+                   </el-input>
+               </el-form-item>
+           </div>
+
+           <div>
+               <el-form-item label="分类ID">
+                   <el-select v-model="ruleForm.categoryId" placeholder="请输入分类ID">
+                       <el-option
+                           v-for="item in categoryList"
+                           :key="item.id"
+                           :label="item.id"
+                           :value="item.id">
+                           <span>{{item.id}}</span>
+                           <span>{{item.categoryName}}</span>
+                       </el-option>
+                   </el-select>
+               </el-form-item>
+           </div>
+
+           <div>
+               <el-form-item label="图片信息" prop="image" >
+                   <el-upload
+                           action="http://localhost:8080/upload/uploadImage"
+                           list-type="picture-card"
+                           :on-preview="handlePictureCardPreview"
+                           :on-success="handleAvatarSuccess"
+                           :on-remove="handleRemove">
+                       <el-image
+                               v-if="imageUrl"
+                               :src="imageUrl"
+                               style="width: 150px;height: 150px"
+                       ></el-image>
+                       <i
+                               v-else
+                               class="el-icon-plus avatar-uploader-icon"
+                       ></i>
+                   </el-upload>
+
+               </el-form-item>
+           </div>
+           <div>
+               <el-form-item style="margin-left: 60px">
+                   <el-button
+                       type="primary"
+                        @click="submitForm">创建
+                   </el-button>
+                   <el-button
+                       style="margin-left: 20px"
+                       @click="cancle">
+                       取消
+                   </el-button>
+               </el-form-item>
+           </div>
+
+       </el-form>
+
+      </div>
+    </div>
+
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/tea.js"></script>
+    <script src="../../js/index.js"></script>
+    <script src="../../api/category.js"></script>
+
+    <script>
+        new Vue({
+            el: '#add',
+            data(){
+                return{
+                    id: '',
+                    visible: true,
+                    imageUrl: '',
+                    ruleForm: {
+                        teaName: '',
+                        price: '',
+                        description: '',
+                        image: '',
+                        categoryId: ''
+                    },
+                    categoryList: [],
+                    actionType: '',
+                }
+            },
+            created() {
+                this.id = requestUrlParam('id')
+                this.actionType = this.id ? 'edit' : 'add'
+                if (this.id) {
+                    this.init()
+                }
+                queryAllCategory().then(res=>{
+                    if(res.code === 1){
+                        this.categoryList = res.data
+                    }
+                    else{
+                        this.$message.error('查询分类失败')
+                    }
+                })
+            },
+            methods:{
+                async init () {
+                    let ids ={
+                        id: this.id
+                    }
+                    queryTeaById(ids).then(res => {
+                        if (String(res.code) === '1') {
+                            this.ruleForm = { ...res.data }
+                            this.imageUrl = "/static/"+this.ruleForm.image
+                        } else {
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    })
+
+                },
+                handleRemove(file, fileList) {
+                    console.log(file, fileList)
+                },
+                handlePictureCardPreview(file) {
+
+                },
+                handleAvatarSuccess(response,file,fileList){
+                    this.ruleForm.image = response
+                },
+                cancle(){
+                    window.location.href = 'list.html'
+                },
+                submitForm(){
+                    let params = {...this.ruleForm}
+                    if (this.actionType == 'add') {
+                        addTea(params).then(res => {
+                            if (res.code === 1) {
+                                this.$message.success('茶品添加成功')
+                                this.goBack()
+                            }
+                            else{
+                                this.$message.error(res.msg)
+                            }
+                        })
+                    }
+                    else {
+                        updateTea(params).then(res => {
+                            if (res.code === 1) {
+                                this.$message.success('茶品修改成功！')
+                                window.location.href = 'list.html'
+                            } else {
+                                this.$message.error(res.msg || '操作失败')
+                            }
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        })
+                    }
+                },
+                goBack(){
+                    window.parent.menuHandle({
+                        id: '1',
+                        url: '/backend/page/tea/list.html',
+                        name: '茶品管理'
+                    },false)
+                }
+            }
+        })
+    </script>
+</body>
+</html>

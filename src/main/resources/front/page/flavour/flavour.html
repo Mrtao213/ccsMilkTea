@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选择口味</title>
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+    <link rel="stylesheet" href="/front/styles/front.css" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+</head>
+<body>
+    <div id='flavour' class="div_common">
+        <div class="div4"></div>
+        <h3>{{teaList.teaName}}</h3>
+        <el-form>
+            <el-form-item label="温度">
+                <el-radio-group v-model="goods.template" size="mini">
+                    <el-radio-button label="正常冰" ></el-radio-button>
+                    <el-radio-button label="少冰" style=" margin-left: 20px"></el-radio-button>
+                    <el-radio-button label="常温" style=" margin-left: 20px"></el-radio-button>
+                    <el-radio-button label="温热" style=" margin-left: 20px"></el-radio-button>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="糖度">
+                <el-radio-group v-model="goods.sugarDegree" size="mini" style="color: grey">
+                    <el-radio-button label="正常糖"></el-radio-button>
+                    <el-radio-button label="七分糖" style=" margin-left: 20px"></el-radio-button>
+                    <el-radio-button label="三分糖" style=" margin-left: 20px"></el-radio-button>
+                    <el-radio-button label="不加糖"style=" margin-left: 20px"></el-radio-button>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="加料">
+                <el-radio-group v-model="goods.addMaterial" size="mini">
+                    <el-radio-button label="芋圆"></el-radio-button>
+                    <el-radio-button label="脆啵啵" style=" margin-left: 20px"></el-radio-button>
+                    <el-radio-button label="椰果" style=" margin-left: 20px"></el-radio-button>
+                    <el-radio-button label="鸡蛋布丁" style=" margin-left: 20px"></el-radio-button>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="描述">
+               {{teaList.description}}
+            </el-form-item>
+    </el-form>
+        <div>
+            <el-button type="primary" @click="submit">提交</el-button>
+            <el-button @click="returnIndex()">返回</el-button>
+        </div>
+    </div>
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/tea.js"></script>
+    <script src="../../api/orders.js"></script>
+    <script src="../../api/time.js"></script>
+    <script src="../../api/shoppingCart.js"></script>
+    <script>
+        new Vue({
+            el: '#flavour',
+            data() {
+                return {
+                    teaList: {},
+                    goods: {
+                        id: '',
+                        userId: '',
+                        teaName: '',
+                        price: '',
+                        template: '',
+                        sugarDegree: '',
+                        addMaterial: '',
+                        image: ''
+                    },
+                    id: '',
+                    order: {
+                        userName: '',
+                        phone: '',
+                        address: '',
+                        orderTime: '',
+                        checkoutTime: '',
+                        money: '',
+                        status: ''
+                    }
+                }
+            },
+            created(){
+                this.init()
+            },
+            methods: {
+                init(){
+                    let url = window.location.href
+                    this.id = url.split('=').slice(1)
+                    let id = {
+                        id: parseInt(this.id)
+                    }
+                    queryTeaById(id).then(res=>{
+                        if(res.data.code === 1){
+                            this.teaList = res.data.data
+                            this.goods.teaName = res.data.data.teaName
+                            this.goods.price = res.data.data.price
+                            this.goods.image = res.data.data.image
+                        }
+                    })
+                },
+                returnIndex(){
+                    window.location.href = '../../index.html'
+                },
+                submit(){
+                    let userInfo = JSON.parse(localStorage.getItem('user'))
+                    this.goods.userId = userInfo.id
+                    addGoods(this.goods).then(res=>{
+                        if(res.data.code === 1){
+                            this.$message.success("商品添加成功")
+                            window.location.href = '../../index.html'
+                        }
+                    })
+
+
+
+                  /*  this.order.userName = userInfo.userName
+                    this.order.phone = userInfo.phone
+                    this.order.address = userInfo.address
+                    let date = new Date();
+                    this.order.orderTime = formatDate(date, 'yyyy-MM-dd HH:mm:ss')
+                    submitOrder(this.order).then(res=>{
+                        if(res.data.code === 1){
+                            this.$message.success('订单提交成功')
+                            // window.location.href = '../../index.html'
+                        }
+                    })*/
+                }
+            }
+        })
+
+    </script>
+</body>
+</html>

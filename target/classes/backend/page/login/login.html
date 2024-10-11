@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+</head>
+<body>
+  <div id="app-login" style="background-image: url(/static/a666666.jpg); width: 50%; margin: auto; margin-top: 200px">
+      <div class="login-container">
+        <el-form :model="loginForm" :rules="rules" ref="loginForm" class="login-form">
+          <h3>脆脆鲨奶茶管理系统</h3>
+          <el-form-item label="用户名" prop="userName">
+            <el-input v-model="loginForm.userName" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="密码" prop="password">
+            <el-input type="password" v-model="loginForm.password" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
+            <el-button @click="resetForm('loginForm')">重置</el-button>
+          </el-form-item>
+        </el-form>
+    </div>
+  </div>
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../js/index.js"></script>
+    <script src="../../api/login.js"></script>
+
+    <script>
+      new Vue({
+        el: '#app-login',
+        data() {
+          return {
+            loginForm: {
+              userName: '',
+              password: ''
+            },
+            rules: {
+              username: [
+                { required: true, message: '请输入用户名', trigger: 'blur' }
+              ],
+              password: [
+                { required: true, message: '请输入密码', trigger: 'blur' }
+              ]
+            }
+          };
+        },
+        methods: {
+          submitForm(formName) {
+            this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  loginSystem(this.loginForm).then(res=>{
+                    if(res.code === 1){
+                      this.$message.success('登录成功')
+                      localStorage.setItem('userInfo',JSON.stringify(res.data))
+                      window.location.href = '/backend/index.html'
+                    }
+                  })
+              } else {
+                console.log('error submit!!');
+                return false;
+              }
+            });
+          },
+          resetForm(formName) {
+            this.$refs[formName].resetFields();
+          }
+        }
+      }
+      )
+    </script>
+
+    <style scoped>
+      .login-container {
+        width: 300px;
+        margin-left: 600px;
+        padding: 20px;
+        border: 1px solid #dcdcdc;
+        border-radius: 5px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+      }
+
+      .login-form {
+        text-align: center;
+      }
+
+      .login-form h3 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
+      }
+    </style>
+</body>
+</html>
