@@ -21,12 +21,12 @@
 
 移动端网页效果
 
-<img src="C:\Users\86134\AppData\Roaming\Typora\typora-user-images\image-20241012000227007.png" alt="image-20241012000227007" style="zoom: 50%;" /><img src="C:\Users\86134\AppData\Roaming\Typora\typora-user-images\image-20241012000414377.png" alt="image-20241012000414377" style="zoom:50%;" />
+![屏幕截图 2024-10-12 000221](https://github.com/user-attachments/assets/e01ce68b-a3f1-45e1-ae4b-7b73a6d20f97)
 
-
+![屏幕截图 2024-10-12 000405](https://github.com/user-attachments/assets/67c68c6a-49c1-4e88-b15a-25832d63c1e5)
 
 后台管理端网页效果
 
-<img src="C:\Users\86134\AppData\Roaming\Typora\typora-user-images\image-20241012000644078.png" alt="image-20241012000644078" style="zoom:50%;" />
+![屏幕截图 2024-10-12 000637](https://github.com/user-attachments/assets/b291658c-fb85-4035-af70-920674c43b73)
 
-<img src="C:\Users\86134\AppData\Roaming\Typora\typora-user-images\image-20241012103843743.png" alt="image-20241012103843743" style="zoom:50%;" />
+![屏幕截图 2024-10-12 103832](https://github.com/user-attachments/assets/f96f5030-9d5c-466b-9d96-c65ddccd6279)
