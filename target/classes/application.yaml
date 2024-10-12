@@ -31,4 +31,4 @@ alipay:
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
 
 img:
-  path: D:\Java Practice Project\demo_teaManage\src\main\resources\static\
+  path: D:\Java Practice Project\ccs_milkTea\src\main\resources\static\
